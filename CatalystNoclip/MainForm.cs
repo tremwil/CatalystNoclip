@@ -40,28 +40,50 @@ namespace CatalystNoclip
         MemoryManager memory;
         PlayerInfo pinfo;
         GameInfo ginfo;
-        string overlayDisplayState;
+        string noclipDisplayState;
         string speedDisplayState;
+
+        bool noclipOn;
+        bool noclipFT;
+        bool tgFromFT;
+        bool allowAutoNC;
+
+        Vec3 pos;
+        Vec3 lastpos;
+        Vec3 velocity;
+        int speed;
+        float rotspeed;
 
         public MainForm()
         {
             boxToUpdate = null;
+
+            noclipOn = false;
+            noclipFT = false;
+            tgFromFT = false;
+            allowAutoNC = false;
+
+            lastpos = Vec3.Zero;
+            velocity = Vec3.Zero;
+            pos = Vec3.Zero;
+            speed = 50;
+            rotspeed = 0.0628f;
 
             gameIsRunning = Process.GetProcessesByName("MirrorsEdgeCatalyst").Length == 0;
             gameIsLoading = false;
 
             mainNoclipLoop = new Timer();
             mainNoclipLoop.Interval = 10;
-            mainNoclipLoop.Tick += GameIndicatorUpdate_Tick;
+            mainNoclipLoop.Tick += MainUpdateLoop;
 
             memory = new MemoryManager();
             pinfo = new PlayerInfo(memory);
             ginfo = new GameInfo(memory);
 
-            overlayDisplayState = "";
-            speedDisplayState = "";
-            Overlay.AddAutoField("ostate", () => overlayDisplayState);
-            Overlay.AddAutoField("speed", () => speedDisplayState);
+            noclipDisplayState = "NOCLIP OFF";
+            speedDisplayState = "SPEED: 50";
+            Overlay.AddAutoField("ncstate", () => Properties.Settings.Default.ShowNCState ? noclipDisplayState : "");
+            Overlay.AddAutoField("speed", () => Properties.Settings.Default.ShowSpeed ? speedDisplayState : "");
 
             InitializeComponent();
         }
@@ -83,7 +105,7 @@ namespace CatalystNoclip
             UseMouseCheckbox.Checked = Properties.Settings.Default.UseMouseForFT;
         }
 
-        private void GameIndicatorUpdate_Tick(object sender, EventArgs e)
+        private void MainUpdateLoop(object sender, EventArgs e)
         {
             if (boxToUpdate != null)
             {
@@ -140,6 +162,11 @@ namespace CatalystNoclip
                     gameIsLoading = true;
                     GameRunningLabel.ForeColor = Color.Goldenrod;
                     GameRunningLabel.Text = "LOADING";
+
+                    noclipOn = false;
+                    noclipFT = false;
+
+                    noclipDisplayState = "NOCLIP OFF";
                 }
                 else if (!loading && (gameIsLoading || lastIter))
                 {
@@ -150,7 +177,121 @@ namespace CatalystNoclip
 
                 if (!gameIsLoading)
                 {
-                    Properties.Settings.Default.ShowNCState = true;
+                    NoclipLoop();
+                }
+            }
+        }
+
+        private void NoclipLoop()
+        {
+            DIKCode rtoggle = (DIKCode)Properties.Settings.Default.RTHotkey;
+            DIKCode ftoggle = (DIKCode)Properties.Settings.Default.FTHotkey;
+            DIKCode speedu = (DIKCode)Properties.Settings.Default.FasterHotkey;
+            DIKCode speedd = (DIKCode)Properties.Settings.Default.SlowerHotkey;
+
+            if (!noclipOn)
+            {
+                pos = pinfo.GetPosition();
+                velocity = (pos - lastpos) * 15;
+                lastpos = pos;
+
+                var mstate = pinfo.GetMovementState();
+                if (mstate != MovementState.Crouching)
+                    allowAutoNC = true;
+
+                else if (
+                    Properties.Settings.Default.AutoNoclip && 
+                    allowAutoNC && 
+                    Math.Abs(velocity.y + 2.45) < 0.1)
+                {
+                    allowAutoNC = false;
+                    InputController.SetToggledFlag(rtoggle, true);
+                }
+            }
+
+            if (InputController.IsKeyToggled(rtoggle) && !noclipOn) 
+            {
+                noclipOn = true;
+                tgFromFT = false;
+                noclipDisplayState = "NOCLIP ON [RT]";
+            }
+            if (!InputController.IsKeyToggled(rtoggle) && noclipOn)
+            {
+                if (noclipFT)
+                {
+                    ginfo.SetTimescale(1);
+                    noclipFT = false;
+                }
+                noclipOn = false;
+                noclipDisplayState = "NOCLIP OFF";
+            }
+            if (InputController.IsKeyToggled(ftoggle) && !noclipFT)
+            {
+                if (!noclipOn)
+                {
+                    noclipOn = true;
+                    tgFromFT = true;
+                }
+                noclipFT = true;
+                ginfo.SetTimescale(0);
+                noclipDisplayState = "NOCLIP ON [FT]";
+            }
+            if (!InputController.IsKeyToggled(ftoggle) && noclipFT)
+            {
+                noclipFT = false;
+                ginfo.SetTimescale(1);
+
+                if (tgFromFT)
+                {
+                    noclipOn = false;
+                    noclipDisplayState = "NOCLIP OFF";
+                }
+                else
+                    noclipDisplayState = "NOCLIP ON [RT]";
+            }
+
+            if (InputController.OnKeyDown(speedu))
+            {
+                speed += 25;
+                speedDisplayState = "SPEED:" + speed.ToString();
+            }
+            if (InputController.OnKeyDown(speedd))
+            {
+                if (speed > 25) speed -= 25;
+                speedDisplayState = "SPEED:" + speed.ToString();
+            }
+
+            if (noclipOn)
+            {
+                Vec3 dpos = Vec3.Zero;
+                Vec3 yawv = pinfo.GetCameraYawVector();
+
+                if (InputController.IsGameActionPressed(GameAction.MoveForward))
+                    dpos += yawv;
+                if (InputController.IsGameActionPressed(GameAction.MoveBackward))
+                    dpos -= yawv;
+                if (InputController.IsGameActionPressed(GameAction.MoveLeft))
+                    dpos += yawv.Left;
+                if (InputController.IsGameActionPressed(GameAction.MoveRight))
+                    dpos += yawv.Right;
+                if (InputController.IsGameActionPressed(GameAction.Jump))
+                    dpos += Vec3.AxisY;
+                if (InputController.IsGameActionPressed(GameAction.DownActions))
+                    dpos -= Vec3.AxisY;
+
+                pos += dpos * speed / 100;
+                pinfo.SetPosition(pos);
+
+                if (noclipFT)
+                {
+                    //float yaw = pinfo.GetCameraYaw();
+                    //DIKCode left = (DIKCode)Properties.Settings.Default.FTCamLeft;
+                    //DIKCode right = (DIKCode)Properties.Settings.Default.FTCamRight;
+
+                    //if (InputController.IsKeyPressed(left)) yaw += rotspeed;
+                    //if (InputController.IsKeyPressed(right)) yaw -= rotspeed;
+
+                    //pinfo.SetCameraYaw(yaw);
                 }
             }
         }
@@ -178,6 +319,8 @@ namespace CatalystNoclip
 
         private void ForceClose()
         {
+            mainNoclipLoop.Stop();
+
             Overlay.Disable();
             InputController.DisableInputHook();
             memory.ReleaseProcess();
@@ -257,8 +400,12 @@ namespace CatalystNoclip
 
         #endregion
 
+        #region settings & hotkeys
+
         private void ResetBtn_Click(object sender, EventArgs e)
         {
+            CancelSetHotkey();
+
             Properties.Settings.Default.RTHotkey = 59;
             Properties.Settings.Default.FTHotkey = 60;
             Properties.Settings.Default.FasterHotkey = 200;
@@ -289,5 +436,67 @@ namespace CatalystNoclip
             boxToUpdate = box;
             updateParamName = paramName;
         }
+
+        private void CancelSetHotkey()
+        {
+            if (boxToUpdate == null) return;
+
+            boxToUpdate.Text = ((DIKCode)Properties.Settings.Default[updateParamName]).ToString();
+            boxToUpdate = null;
+
+            InputController.MakeProcessSpecific("MirrorsEdgeCatalyst");
+        }
+
+        private void MainForm_Deactivate(object sender, EventArgs e)
+        {
+            CancelSetHotkey();
+        }
+
+        #endregion
+
+        #region checkboxes
+
+        private void AutoNoclipCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            CancelSetHotkey();
+
+            Properties.Settings.Default.AutoNoclip = AutoNoclipCheckbox.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void OverlayCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            CancelSetHotkey();
+
+            SpeedCheckbox.Checked = OverlayCheckbox.Checked;
+            SpeedCheckbox.AutoCheck = OverlayCheckbox.Checked;
+            SpeedCheckbox.ForeColor = OverlayCheckbox.Checked ? Color.White : Color.DimGray;
+            NCStateCheckbox.Checked = OverlayCheckbox.Checked;
+            NCStateCheckbox.AutoCheck = OverlayCheckbox.Checked;
+            NCStateCheckbox.ForeColor = OverlayCheckbox.Checked ? Color.White : Color.DimGray;
+
+            Properties.Settings.Default.ShowNCState = OverlayCheckbox.Checked;
+            Properties.Settings.Default.ShowSpeed = OverlayCheckbox.Checked;
+            Properties.Settings.Default.ShowOverlay = OverlayCheckbox.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void NCStateCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            CancelSetHotkey();
+
+            Properties.Settings.Default.ShowNCState = NCStateCheckbox.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void SpeedCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            CancelSetHotkey();
+
+            Properties.Settings.Default.ShowSpeed = SpeedCheckbox.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        #endregion
     }
 }

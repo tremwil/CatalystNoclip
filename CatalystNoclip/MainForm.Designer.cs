@@ -126,9 +126,9 @@
             this.title.ForeColor = System.Drawing.Color.White;
             this.title.Location = new System.Drawing.Point(3, 5);
             this.title.Name = "title";
-            this.title.Size = new System.Drawing.Size(220, 13);
+            this.title.Size = new System.Drawing.Size(216, 13);
             this.title.TabIndex = 0;
-            this.title.Text = "ME: Catalyst Noclip Tool - By Tremwil";
+            this.title.Text = "ME: Catalyst Noclip Tool - By tremwil";
             this.title.MouseDown += new System.Windows.Forms.MouseEventHandler(this.title_MouseDown);
             // 
             // panel2
@@ -189,6 +189,7 @@
             this.SpeedCheckbox.TabIndex = 5;
             this.SpeedCheckbox.Text = "Show Speed";
             this.SpeedCheckbox.UseVisualStyleBackColor = true;
+            this.SpeedCheckbox.CheckedChanged += new System.EventHandler(this.SpeedCheckbox_CheckedChanged);
             // 
             // NCStateCheckbox
             // 
@@ -202,12 +203,15 @@
             this.NCStateCheckbox.TabIndex = 4;
             this.NCStateCheckbox.Text = "Show NC State";
             this.NCStateCheckbox.UseVisualStyleBackColor = true;
+            this.NCStateCheckbox.CheckedChanged += new System.EventHandler(this.NCStateCheckbox_CheckedChanged);
             // 
             // OverlayCheckbox
             // 
             this.OverlayCheckbox.AutoSize = true;
             this.OverlayCheckbox.Checked = true;
             this.OverlayCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.OverlayCheckbox.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.OverlayCheckbox.FlatAppearance.CheckedBackColor = System.Drawing.Color.White;
             this.OverlayCheckbox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.OverlayCheckbox.Location = new System.Drawing.Point(7, 33);
             this.OverlayCheckbox.Name = "OverlayCheckbox";
@@ -215,6 +219,7 @@
             this.OverlayCheckbox.TabIndex = 3;
             this.OverlayCheckbox.Text = "Overlay Visible";
             this.OverlayCheckbox.UseVisualStyleBackColor = true;
+            this.OverlayCheckbox.CheckedChanged += new System.EventHandler(this.OverlayCheckbox_CheckedChanged);
             // 
             // panel7
             // 
@@ -278,6 +283,7 @@
             this.UseMouseCheckbox.AutoCheck = false;
             this.UseMouseCheckbox.AutoSize = true;
             this.UseMouseCheckbox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.UseMouseCheckbox.ForeColor = System.Drawing.Color.DimGray;
             this.UseMouseCheckbox.Location = new System.Drawing.Point(3, 114);
             this.UseMouseCheckbox.Name = "UseMouseCheckbox";
             this.UseMouseCheckbox.Size = new System.Drawing.Size(121, 19);
@@ -291,9 +297,9 @@
             this.label9.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.Location = new System.Drawing.Point(5, 70);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(82, 15);
+            this.label9.Size = new System.Drawing.Size(116, 15);
             this.label9.TabIndex = 12;
-            this.label9.Text = "Camera Right";
+            this.label9.Text = "Camera Right (WIP)";
             // 
             // label8
             // 
@@ -301,9 +307,9 @@
             this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.Location = new System.Drawing.Point(3, 29);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(75, 15);
+            this.label8.Size = new System.Drawing.Size(109, 15);
             this.label8.TabIndex = 11;
-            this.label8.Text = "Camera Left";
+            this.label8.Text = "Camera Left (WIP)";
             // 
             // panel5
             // 
@@ -399,6 +405,7 @@
             this.AutoNoclipCheckbox.TabIndex = 6;
             this.AutoNoclipCheckbox.Text = "Enable RT Noclip on glide glitch";
             this.AutoNoclipCheckbox.UseVisualStyleBackColor = true;
+            this.AutoNoclipCheckbox.CheckedChanged += new System.EventHandler(this.AutoNoclipCheckbox_CheckedChanged);
             // 
             // label6
             // 
@@ -501,6 +508,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "MainForm";
             this.Text = "MEC: Noclip";
+            this.Deactivate += new System.EventHandler(this.MainForm_Deactivate);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
