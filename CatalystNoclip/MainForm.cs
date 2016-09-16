@@ -309,6 +309,8 @@ namespace CatalystNoclip
             UpdateSettings();
             InputController.MakeProcessSpecific("MirrorsEdgeCatalyst");
             InputController.EnableInputHook();
+
+            Overlay.Enable(true);
         }
 
         private void XButton_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
