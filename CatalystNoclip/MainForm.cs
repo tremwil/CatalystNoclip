@@ -129,7 +129,7 @@ namespace CatalystNoclip
             if (p.Length == 0 && gameIsRunning)
             {
                 gameIsRunning = false;
-                Overlay.Disable();
+                Overlay.Displaying = false;
                 memory.ReleaseProcess();
 
                 GameRunningLabel.Text = "NOT RUNNING";
@@ -143,7 +143,7 @@ namespace CatalystNoclip
                 {
                     gameIsRunning = true;
                     memory.OpenProcess("MirrorsEdgeCatalyst");
-                    Overlay.Enable(true);
+                    Overlay.Displaying = true;
                     lastIter = true;
                 }
 
