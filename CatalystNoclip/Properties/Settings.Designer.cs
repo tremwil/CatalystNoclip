@@ -26,24 +26,24 @@ namespace CatalystNoclip.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("59")]
-        public int RTHotkey {
+        public int ToggleNC {
             get {
-                return ((int)(this["RTHotkey"]));
+                return ((int)(this["ToggleNC"]));
             }
             set {
-                this["RTHotkey"] = value;
+                this["ToggleNC"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("60")]
-        public int FTHotkey {
+        public int SwitchNCMode {
             get {
-                return ((int)(this["FTHotkey"]));
+                return ((int)(this["SwitchNCMode"]));
             }
             set {
-                this["FTHotkey"] = value;
+                this["SwitchNCMode"] = value;
             }
         }
         

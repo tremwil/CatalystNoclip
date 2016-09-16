@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
@@ -34,7 +35,8 @@ namespace CatalystNoclip
         Label boxToUpdate;
         string updateParamName;
 
-        Timer mainNoclipLoop;
+        System.Windows.Forms.Timer mainNoclipLoop;
+        Action noclipMoveLoop;
         bool gameIsRunning;
         bool gameIsLoading;
         MemoryManager memory;
@@ -45,14 +47,12 @@ namespace CatalystNoclip
 
         bool noclipOn;
         bool noclipFT;
-        bool tgFromFT;
         bool allowAutoNC;
 
         Vec3 pos;
         Vec3 lastpos;
         Vec3 velocity;
         int speed;
-        float rotspeed;
 
         public MainForm()
         {
@@ -60,21 +60,20 @@ namespace CatalystNoclip
 
             noclipOn = false;
             noclipFT = false;
-            tgFromFT = false;
             allowAutoNC = false;
 
             lastpos = Vec3.Zero;
             velocity = Vec3.Zero;
             pos = Vec3.Zero;
             speed = 50;
-            rotspeed = 0.0628f;
 
             gameIsRunning = Process.GetProcessesByName("MirrorsEdgeCatalyst").Length == 0;
             gameIsLoading = false;
 
-            mainNoclipLoop = new Timer();
-            mainNoclipLoop.Interval = 10;
-            mainNoclipLoop.Tick += MainUpdateLoop;
+            noclipMoveLoop = new Action(NoclipMovementTask);
+            mainNoclipLoop = new System.Windows.Forms.Timer();
+            mainNoclipLoop.Interval = 50;
+            mainNoclipLoop.Tick += NonCriticalLoop;
 
             memory = new MemoryManager();
             pinfo = new PlayerInfo(memory);
@@ -90,8 +89,8 @@ namespace CatalystNoclip
 
         private void UpdateSettings()
         {
-            RTInputBox.Text = ((DIKCode)Properties.Settings.Default.RTHotkey).ToString();
-            FTInputBox.Text = ((DIKCode)Properties.Settings.Default.FTHotkey).ToString();
+            RTInputBox.Text = ((DIKCode)Properties.Settings.Default.ToggleNC).ToString();
+            FTInputBox.Text = ((DIKCode)Properties.Settings.Default.SwitchNCMode).ToString();
             MFInputBox.Text = ((DIKCode)Properties.Settings.Default.FasterHotkey).ToString();
             MSInputBox.Text = ((DIKCode)Properties.Settings.Default.SlowerHotkey).ToString();
             AutoNoclipCheckbox.Checked = Properties.Settings.Default.AutoNoclip;
@@ -105,7 +104,7 @@ namespace CatalystNoclip
             UseMouseCheckbox.Checked = Properties.Settings.Default.UseMouseForFT;
         }
 
-        private void MainUpdateLoop(object sender, EventArgs e)
+        private void NonCriticalLoop(object sender, EventArgs e)
         {
             if (boxToUpdate != null)
             {
@@ -147,7 +146,7 @@ namespace CatalystNoclip
                     lastIter = true;
                 }
 
-                bool loading;
+                bool loading = false;
                 try
                 {
                     loading = ginfo.IsLoading();
@@ -159,6 +158,7 @@ namespace CatalystNoclip
 
                 if (loading && (!gameIsLoading || lastIter))
                 {
+                    ginfo.SetTimescale(1); // Lets not get stuck in a loading screen
                     gameIsLoading = true;
                     GameRunningLabel.ForeColor = Color.Goldenrod;
                     GameRunningLabel.Text = "LOADING";
@@ -177,15 +177,15 @@ namespace CatalystNoclip
 
                 if (!gameIsLoading)
                 {
-                    NoclipLoop();
+                    NoclipToggleLoop();
                 }
             }
         }
 
-        private void NoclipLoop()
+        private void NoclipToggleLoop()
         {
-            DIKCode rtoggle = (DIKCode)Properties.Settings.Default.RTHotkey;
-            DIKCode ftoggle = (DIKCode)Properties.Settings.Default.FTHotkey;
+            DIKCode rtoggle = (DIKCode)Properties.Settings.Default.ToggleNC;
+            DIKCode ftoggle = (DIKCode)Properties.Settings.Default.SwitchNCMode;
             DIKCode speedu = (DIKCode)Properties.Settings.Default.FasterHotkey;
             DIKCode speedd = (DIKCode)Properties.Settings.Default.SlowerHotkey;
 
@@ -212,7 +212,6 @@ namespace CatalystNoclip
             if (InputController.IsKeyToggled(rtoggle) && !noclipOn) 
             {
                 noclipOn = true;
-                tgFromFT = false;
                 noclipDisplayState = "NOCLIP ON [RT]";
             }
             if (!InputController.IsKeyToggled(rtoggle) && noclipOn)
@@ -225,29 +224,26 @@ namespace CatalystNoclip
                 noclipOn = false;
                 noclipDisplayState = "NOCLIP OFF";
             }
-            if (InputController.IsKeyToggled(ftoggle) && !noclipFT)
+            if (InputController.OnKeyDown(ftoggle))
             {
                 if (!noclipOn)
                 {
                     noclipOn = true;
-                    tgFromFT = true;
+                    InputController.SetToggledFlag(rtoggle, true);
                 }
-                noclipFT = true;
-                ginfo.SetTimescale(0);
-                noclipDisplayState = "NOCLIP ON [FT]";
-            }
-            if (!InputController.IsKeyToggled(ftoggle) && noclipFT)
-            {
-                noclipFT = false;
-                ginfo.SetTimescale(1);
 
-                if (tgFromFT)
+                if (noclipFT)
                 {
-                    noclipOn = false;
-                    noclipDisplayState = "NOCLIP OFF";
+                    ginfo.SetTimescale(1);
+                    noclipFT = false;
+                    noclipDisplayState = "NOCLIP ON [RT]";
                 }
                 else
-                    noclipDisplayState = "NOCLIP ON [RT]";
+                {
+                    ginfo.SetTimescale(0);
+                    noclipFT = true;
+                    noclipDisplayState = "NOCLIP ON [FT]";
+                }
             }
 
             if (InputController.OnKeyDown(speedu))
@@ -260,38 +256,44 @@ namespace CatalystNoclip
                 if (speed > 25) speed -= 25;
                 speedDisplayState = "SPEED:" + speed.ToString();
             }
+        }
 
-            if (noclipOn)
+        public void NoclipMovementTask()
+        {
+            Stopwatch w = new Stopwatch();
+            w.Start();
+
+            long ct;
+            long lt = 0;
+            long dt;
+            long freq = Stopwatch.Frequency;
+
+            while (true)
             {
-                Vec3 dpos = Vec3.Zero;
-                Vec3 yawv = pinfo.GetCameraYawVector();
+                ct = w.ElapsedTicks;
+                dt = ct - lt;
+                lt = ct;
 
-                if (InputController.IsGameActionPressed(GameAction.MoveForward))
-                    dpos += yawv;
-                if (InputController.IsGameActionPressed(GameAction.MoveBackward))
-                    dpos -= yawv;
-                if (InputController.IsGameActionPressed(GameAction.MoveLeft))
-                    dpos += yawv.Left;
-                if (InputController.IsGameActionPressed(GameAction.MoveRight))
-                    dpos += yawv.Right;
-                if (InputController.IsGameActionPressed(GameAction.Jump))
-                    dpos += Vec3.AxisY;
-                if (InputController.IsGameActionPressed(GameAction.DownActions))
-                    dpos -= Vec3.AxisY;
-
-                pos += dpos * speed / 100;
-                pinfo.SetPosition(pos);
-
-                if (noclipFT)
+                if (noclipOn)
                 {
-                    //float yaw = pinfo.GetCameraYaw();
-                    //DIKCode left = (DIKCode)Properties.Settings.Default.FTCamLeft;
-                    //DIKCode right = (DIKCode)Properties.Settings.Default.FTCamRight;
+                    Vec3 dpos = Vec3.Zero;
+                    Vec3 yawv = pinfo.GetCameraYawVector();
 
-                    //if (InputController.IsKeyPressed(left)) yaw += rotspeed;
-                    //if (InputController.IsKeyPressed(right)) yaw -= rotspeed;
+                    if (InputController.IsGameActionPressed(GameAction.MoveForward))
+                        dpos += yawv;
+                    if (InputController.IsGameActionPressed(GameAction.MoveBackward))
+                        dpos -= yawv;
+                    if (InputController.IsGameActionPressed(GameAction.MoveLeft))
+                        dpos += yawv.Left;
+                    if (InputController.IsGameActionPressed(GameAction.MoveRight))
+                        dpos += yawv.Right;
+                    if (InputController.IsGameActionPressed(GameAction.Jump))
+                        dpos += Vec3.AxisY;
+                    if (InputController.IsGameActionPressed(GameAction.DownActions))
+                        dpos -= Vec3.AxisY;
 
-                    //pinfo.SetCameraYaw(yaw);
+                    pos += dpos * speed * dt / freq;
+                    pinfo.SetPosition(pos);
                 }
             }
         }
@@ -305,6 +307,7 @@ namespace CatalystNoclip
             CamLeftInputBox.Click += (o, s) => SetHotkey(CamLeftInputBox, "FTCamLeft");
             CamRightInputBox.Click += (o, s) => SetHotkey(CamRightInputBox, "FTCamRight");
 
+            Task.Run(noclipMoveLoop);
             mainNoclipLoop.Start();
             UpdateSettings();
             InputController.MakeProcessSpecific("MirrorsEdgeCatalyst");
@@ -408,8 +411,8 @@ namespace CatalystNoclip
         {
             CancelSetHotkey();
 
-            Properties.Settings.Default.RTHotkey = 59;
-            Properties.Settings.Default.FTHotkey = 60;
+            Properties.Settings.Default.ToggleNC = 59;
+            Properties.Settings.Default.SwitchNCMode = 60;
             Properties.Settings.Default.FasterHotkey = 200;
             Properties.Settings.Default.SlowerHotkey = 208;
             Properties.Settings.Default.AutoNoclip = false;

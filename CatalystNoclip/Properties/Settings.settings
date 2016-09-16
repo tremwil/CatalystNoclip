@@ -2,10 +2,10 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="CatalystNoclip.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="RTHotkey" Type="System.Int32" Scope="User">
+    <Setting Name="ToggleNC" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">59</Value>
     </Setting>
-    <Setting Name="FTHotkey" Type="System.Int32" Scope="User">
+    <Setting Name="SwitchNCMode" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">60</Value>
     </Setting>
     <Setting Name="FasterHotkey" Type="System.Int32" Scope="User">
