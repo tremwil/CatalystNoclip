@@ -300,8 +300,8 @@ namespace CatalystNoclip
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            RTInputBox.Click += (o, s) => SetHotkey(RTInputBox, "RTHotkey");
-            FTInputBox.Click += (o, s) => SetHotkey(FTInputBox, "FTHotkey");
+            RTInputBox.Click += (o, s) => SetHotkey(RTInputBox, "ToggleNC");
+            FTInputBox.Click += (o, s) => SetHotkey(FTInputBox, "SwitchNCMode");
             MFInputBox.Click += (o, s) => SetHotkey(MFInputBox, "FasterHotkey");
             MSInputBox.Click += (o, s) => SetHotkey(MSInputBox, "SlowerHotkey");
             CamLeftInputBox.Click += (o, s) => SetHotkey(CamLeftInputBox, "FTCamLeft");
