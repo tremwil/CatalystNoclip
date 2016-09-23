@@ -17,11 +17,8 @@
     <Setting Name="AutoNoclip" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="FTCamLeft" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">203</Value>
-    </Setting>
-    <Setting Name="FTCamRight" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">205</Value>
+    <Setting Name="NSHotkey" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">61</Value>
     </Setting>
     <Setting Name="ShowOverlay" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -32,8 +29,11 @@
     <Setting Name="ShowNCState" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="UseMouseForFT" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+    <Setting Name="ShowNSState" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="OnlyShowWhenTrue" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

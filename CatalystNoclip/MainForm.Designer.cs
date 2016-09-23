@@ -34,18 +34,18 @@
             this.XButton = new System.Windows.Forms.LinkLabel();
             this.title = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.ResetBtn = new System.Windows.Forms.Button();
             this.panel6 = new System.Windows.Forms.Panel();
+            this.OSECheckbox = new System.Windows.Forms.CheckBox();
+            this.NSStateCheckbox = new System.Windows.Forms.CheckBox();
             this.SpeedCheckbox = new System.Windows.Forms.CheckBox();
             this.NCStateCheckbox = new System.Windows.Forms.CheckBox();
             this.OverlayCheckbox = new System.Windows.Forms.CheckBox();
             this.panel7 = new System.Windows.Forms.Panel();
             this.label7 = new System.Windows.Forms.Label();
+            this.ResetBtn = new System.Windows.Forms.Button();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.CamRightInputBox = new System.Windows.Forms.Label();
-            this.CamLeftInputBox = new System.Windows.Forms.Label();
-            this.UseMouseCheckbox = new System.Windows.Forms.CheckBox();
-            this.label9 = new System.Windows.Forms.Label();
+            this.KysButton = new System.Windows.Forms.Button();
+            this.NSInputBox = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
             this.label11 = new System.Windows.Forms.Label();
@@ -136,8 +136,8 @@
             // 
             this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel2.Controls.Add(this.ResetBtn);
             this.panel2.Controls.Add(this.panel6);
+            this.panel2.Controls.Add(this.ResetBtn);
             this.panel2.Controls.Add(this.panel4);
             this.panel2.Controls.Add(this.NoclipSettimgs);
             this.panel2.Controls.Add(this.GameRunningLabel);
@@ -145,38 +145,53 @@
             this.panel2.ForeColor = System.Drawing.Color.White;
             this.panel2.Location = new System.Drawing.Point(0, 27);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(280, 342);
+            this.panel2.Size = new System.Drawing.Size(280, 341);
             this.panel2.TabIndex = 1;
             this.panel2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel2_MouseDown);
-            // 
-            // ResetBtn
-            // 
-            this.ResetBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
-            this.ResetBtn.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
-            this.ResetBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ResetBtn.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ResetBtn.ForeColor = System.Drawing.Color.White;
-            this.ResetBtn.Location = new System.Drawing.Point(140, 292);
-            this.ResetBtn.Name = "ResetBtn";
-            this.ResetBtn.Size = new System.Drawing.Size(124, 31);
-            this.ResetBtn.TabIndex = 13;
-            this.ResetBtn.Text = "Reset Settings";
-            this.ResetBtn.UseVisualStyleBackColor = false;
-            this.ResetBtn.Click += new System.EventHandler(this.ResetBtn_Click);
             // 
             // panel6
             // 
             this.panel6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.panel6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel6.Controls.Add(this.OSECheckbox);
+            this.panel6.Controls.Add(this.NSStateCheckbox);
             this.panel6.Controls.Add(this.SpeedCheckbox);
             this.panel6.Controls.Add(this.NCStateCheckbox);
             this.panel6.Controls.Add(this.OverlayCheckbox);
             this.panel6.Controls.Add(this.panel7);
             this.panel6.Controls.Add(this.label7);
-            this.panel6.Location = new System.Drawing.Point(142, 177);
+            this.panel6.Location = new System.Drawing.Point(132, 177);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(122, 109);
+            this.panel6.Size = new System.Drawing.Size(132, 151);
             this.panel6.TabIndex = 12;
+            // 
+            // OSECheckbox
+            // 
+            this.OSECheckbox.AutoSize = true;
+            this.OSECheckbox.Checked = true;
+            this.OSECheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.OSECheckbox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.OSECheckbox.Location = new System.Drawing.Point(3, 125);
+            this.OSECheckbox.Name = "OSECheckbox";
+            this.OSECheckbox.Size = new System.Drawing.Size(131, 19);
+            this.OSECheckbox.TabIndex = 7;
+            this.OSECheckbox.Text = "Only Show Enabled";
+            this.OSECheckbox.UseVisualStyleBackColor = true;
+            this.OSECheckbox.CheckedChanged += new System.EventHandler(this.OSECheckbox_CheckedChanged);
+            // 
+            // NSStateCheckbox
+            // 
+            this.NSStateCheckbox.AutoSize = true;
+            this.NSStateCheckbox.Checked = true;
+            this.NSStateCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.NSStateCheckbox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.NSStateCheckbox.Location = new System.Drawing.Point(3, 101);
+            this.NSStateCheckbox.Name = "NSStateCheckbox";
+            this.NSStateCheckbox.Size = new System.Drawing.Size(109, 19);
+            this.NSStateCheckbox.TabIndex = 6;
+            this.NSStateCheckbox.Text = "Show NS State";
+            this.NSStateCheckbox.UseVisualStyleBackColor = true;
+            this.NSStateCheckbox.CheckedChanged += new System.EventHandler(this.NSStateCheckbox_CheckedChanged);
             // 
             // SpeedCheckbox
             // 
@@ -184,7 +199,7 @@
             this.SpeedCheckbox.Checked = true;
             this.SpeedCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.SpeedCheckbox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SpeedCheckbox.Location = new System.Drawing.Point(6, 83);
+            this.SpeedCheckbox.Location = new System.Drawing.Point(3, 79);
             this.SpeedCheckbox.Name = "SpeedCheckbox";
             this.SpeedCheckbox.Size = new System.Drawing.Size(95, 19);
             this.SpeedCheckbox.TabIndex = 5;
@@ -198,7 +213,7 @@
             this.NCStateCheckbox.Checked = true;
             this.NCStateCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.NCStateCheckbox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.NCStateCheckbox.Location = new System.Drawing.Point(6, 58);
+            this.NCStateCheckbox.Location = new System.Drawing.Point(3, 56);
             this.NCStateCheckbox.Name = "NCStateCheckbox";
             this.NCStateCheckbox.Size = new System.Drawing.Size(109, 19);
             this.NCStateCheckbox.TabIndex = 4;
@@ -214,7 +229,7 @@
             this.OverlayCheckbox.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.OverlayCheckbox.FlatAppearance.CheckedBackColor = System.Drawing.Color.White;
             this.OverlayCheckbox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.OverlayCheckbox.Location = new System.Drawing.Point(7, 33);
+            this.OverlayCheckbox.Location = new System.Drawing.Point(4, 33);
             this.OverlayCheckbox.Name = "OverlayCheckbox";
             this.OverlayCheckbox.Size = new System.Drawing.Size(108, 19);
             this.OverlayCheckbox.TabIndex = 3;
@@ -241,76 +256,70 @@
             this.label7.TabIndex = 0;
             this.label7.Text = "Overlay Settings";
             // 
+            // ResetBtn
+            // 
+            this.ResetBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.ResetBtn.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
+            this.ResetBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ResetBtn.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ResetBtn.ForeColor = System.Drawing.Color.Goldenrod;
+            this.ResetBtn.Location = new System.Drawing.Point(11, 295);
+            this.ResetBtn.Name = "ResetBtn";
+            this.ResetBtn.Size = new System.Drawing.Size(112, 33);
+            this.ResetBtn.TabIndex = 13;
+            this.ResetBtn.Text = "Reset Settings";
+            this.ResetBtn.UseVisualStyleBackColor = false;
+            this.ResetBtn.Click += new System.EventHandler(this.ResetBtn_Click);
+            // 
             // panel4
             // 
             this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
             this.panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel4.Controls.Add(this.CamRightInputBox);
-            this.panel4.Controls.Add(this.CamLeftInputBox);
-            this.panel4.Controls.Add(this.UseMouseCheckbox);
-            this.panel4.Controls.Add(this.label9);
+            this.panel4.Controls.Add(this.KysButton);
+            this.panel4.Controls.Add(this.NSInputBox);
             this.panel4.Controls.Add(this.label8);
             this.panel4.Controls.Add(this.panel5);
             this.panel4.Controls.Add(this.label11);
             this.panel4.Location = new System.Drawing.Point(11, 177);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(122, 146);
+            this.panel4.Size = new System.Drawing.Size(113, 112);
             this.panel4.TabIndex = 11;
             // 
-            // CamRightInputBox
+            // KysButton
             // 
-            this.CamRightInputBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
-            this.CamRightInputBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.CamRightInputBox.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.CamRightInputBox.ForeColor = System.Drawing.Color.White;
-            this.CamRightInputBox.Location = new System.Drawing.Point(6, 88);
-            this.CamRightInputBox.Name = "CamRightInputBox";
-            this.CamRightInputBox.Size = new System.Drawing.Size(100, 20);
-            this.CamRightInputBox.TabIndex = 13;
+            this.KysButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.KysButton.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
+            this.KysButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.KysButton.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.KysButton.ForeColor = System.Drawing.Color.Firebrick;
+            this.KysButton.Location = new System.Drawing.Point(5, 73);
+            this.KysButton.Name = "KysButton";
+            this.KysButton.Size = new System.Drawing.Size(101, 33);
+            this.KysButton.TabIndex = 14;
+            this.KysButton.Text = "Kill Yourself";
+            this.KysButton.UseVisualStyleBackColor = false;
+            this.KysButton.Click += new System.EventHandler(this.KysButton_Click);
             // 
-            // CamLeftInputBox
+            // NSInputBox
             // 
-            this.CamLeftInputBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
-            this.CamLeftInputBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.CamLeftInputBox.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.CamLeftInputBox.ForeColor = System.Drawing.Color.White;
-            this.CamLeftInputBox.Location = new System.Drawing.Point(6, 47);
-            this.CamLeftInputBox.Name = "CamLeftInputBox";
-            this.CamLeftInputBox.Size = new System.Drawing.Size(100, 20);
-            this.CamLeftInputBox.TabIndex = 11;
-            // 
-            // UseMouseCheckbox
-            // 
-            this.UseMouseCheckbox.AutoCheck = false;
-            this.UseMouseCheckbox.AutoSize = true;
-            this.UseMouseCheckbox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.UseMouseCheckbox.ForeColor = System.Drawing.Color.DimGray;
-            this.UseMouseCheckbox.Location = new System.Drawing.Point(3, 114);
-            this.UseMouseCheckbox.Name = "UseMouseCheckbox";
-            this.UseMouseCheckbox.Size = new System.Drawing.Size(121, 19);
-            this.UseMouseCheckbox.TabIndex = 6;
-            this.UseMouseCheckbox.Text = "Use Mouse (WIP)";
-            this.UseMouseCheckbox.UseVisualStyleBackColor = true;
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(5, 70);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(116, 15);
-            this.label9.TabIndex = 12;
-            this.label9.Text = "Camera Right (WIP)";
+            this.NSInputBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+            this.NSInputBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.NSInputBox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.NSInputBox.ForeColor = System.Drawing.Color.White;
+            this.NSInputBox.Location = new System.Drawing.Point(5, 48);
+            this.NSInputBox.Name = "NSInputBox";
+            this.NSInputBox.Size = new System.Drawing.Size(100, 20);
+            this.NSInputBox.TabIndex = 11;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(3, 29);
+            this.label8.Location = new System.Drawing.Point(-1, 29);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(109, 15);
+            this.label8.Size = new System.Drawing.Size(110, 15);
             this.label8.TabIndex = 11;
-            this.label8.Text = "Camera Left (WIP)";
+            this.label8.Text = "Toggle NoStumble";
             // 
             // panel5
             // 
@@ -325,11 +334,11 @@
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label11.ForeColor = System.Drawing.Color.Goldenrod;
-            this.label11.Location = new System.Drawing.Point(-1, 4);
+            this.label11.Location = new System.Drawing.Point(5, 4);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(121, 17);
+            this.label11.Size = new System.Drawing.Size(95, 17);
             this.label11.TabIndex = 0;
-            this.label11.Text = "FT Noclip Hotkeys";
+            this.label11.Text = "Miscellaneous";
             // 
             // NoclipSettimgs
             // 
@@ -501,7 +510,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
-            this.ClientSize = new System.Drawing.Size(280, 369);
+            this.ClientSize = new System.Drawing.Size(280, 368);
             this.Controls.Add(this.SpacingPanel);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
@@ -557,12 +566,12 @@
         private System.Windows.Forms.CheckBox OverlayCheckbox;
         private System.Windows.Forms.CheckBox SpeedCheckbox;
         private System.Windows.Forms.CheckBox NCStateCheckbox;
-        private System.Windows.Forms.CheckBox UseMouseCheckbox;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label CamRightInputBox;
-        private System.Windows.Forms.Label CamLeftInputBox;
         private System.Windows.Forms.Button ResetBtn;
+        private System.Windows.Forms.Label NSInputBox;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button KysButton;
+        private System.Windows.Forms.CheckBox NSStateCheckbox;
+        private System.Windows.Forms.CheckBox OSECheckbox;
     }
 }
 

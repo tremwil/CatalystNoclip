@@ -44,10 +44,12 @@ namespace CatalystNoclip
         GameInfo ginfo;
         string noclipDisplayState;
         string speedDisplayState;
+        string noStumbleDisplayState;
 
         bool noclipOn;
         bool noclipFT;
         bool allowAutoNC;
+        bool noStumble;
 
         Vec3 pos;
         Vec3 lastpos;
@@ -61,50 +63,77 @@ namespace CatalystNoclip
             noclipOn = false;
             noclipFT = false;
             allowAutoNC = false;
+            noStumble = false;
 
             lastpos = Vec3.Zero;
             velocity = Vec3.Zero;
             pos = Vec3.Zero;
-            speed = 50;
+            speed = 32;
 
             gameIsRunning = Process.GetProcessesByName("MirrorsEdgeCatalyst").Length == 0;
             gameIsLoading = false;
 
-            noclipMoveLoop = new Action(NoclipMovementTask);
+            noclipMoveLoop = new Action(NoclipMovementThread);
             mainNoclipLoop = new System.Windows.Forms.Timer();
-            mainNoclipLoop.Interval = 50;
-            mainNoclipLoop.Tick += NonCriticalLoop;
+            mainNoclipLoop.Interval = 20;
+            mainNoclipLoop.Tick += MainAppLoop;
 
             memory = new MemoryManager();
             pinfo = new PlayerInfo(memory);
             ginfo = new GameInfo(memory);
 
             noclipDisplayState = "NOCLIP OFF";
-            speedDisplayState = "SPEED: 50";
+            speedDisplayState = "SPEED: 32";
+            noStumbleDisplayState = "NOSTUMBLE OFF";
+
             Overlay.AddAutoField("ncstate", () => Properties.Settings.Default.ShowNCState ? noclipDisplayState : "");
             Overlay.AddAutoField("speed", () => Properties.Settings.Default.ShowSpeed ? speedDisplayState : "");
+            Overlay.AddAutoField("nostumb", () => Properties.Settings.Default.ShowNSState ? noStumbleDisplayState : "");
 
             InitializeComponent();
         }
 
-        private void UpdateSettings()
+        #region noclip / nostumble toggle functions
+
+        private void SetNoclip(bool state)
         {
-            RTInputBox.Text = ((DIKCode)Properties.Settings.Default.ToggleNC).ToString();
-            FTInputBox.Text = ((DIKCode)Properties.Settings.Default.SwitchNCMode).ToString();
-            MFInputBox.Text = ((DIKCode)Properties.Settings.Default.FasterHotkey).ToString();
-            MSInputBox.Text = ((DIKCode)Properties.Settings.Default.SlowerHotkey).ToString();
-            AutoNoclipCheckbox.Checked = Properties.Settings.Default.AutoNoclip;
+            if (!(noclipOn ^ state))
+                return;
 
-            OverlayCheckbox.Checked = Properties.Settings.Default.ShowOverlay;
-            NCStateCheckbox.Checked = Properties.Settings.Default.ShowNCState;
-            SpeedCheckbox.Checked = Properties.Settings.Default.ShowSpeed;
+            if (!state && noclipFT)
+                SetNoclipFT(false);
 
-            CamLeftInputBox.Text = ((DIKCode)Properties.Settings.Default.FTCamLeft).ToString();
-            CamRightInputBox.Text = ((DIKCode)Properties.Settings.Default.FTCamRight).ToString();
-            UseMouseCheckbox.Checked = Properties.Settings.Default.UseMouseForFT;
+            noclipOn = state;
+            InputController.SetToggledFlag((DIKCode)Properties.Settings.Default.ToggleNC, state);
         }
 
-        private void NonCriticalLoop(object sender, EventArgs e)
+        private void SetNoclipFT(bool state)
+        {
+            if (!(noclipFT ^ state))
+                return;
+
+            if (!noclipOn && state)
+                SetNoclip(true);
+
+            noclipFT = state;
+            ginfo.SetTimescale(state ? 0 : 1);
+            InputController.SetToggledFlag((DIKCode)Properties.Settings.Default.SwitchNCMode, state);
+        }
+
+        private void SetNoStumble(bool state)
+        {
+            if (!(noStumble ^ state))
+                return;
+
+            noStumble = state;
+            InputController.SetToggledFlag((DIKCode)Properties.Settings.Default.NSHotkey, state);
+        }
+
+        #endregion
+
+        #region app loop
+
+        private void MainAppLoop(object sender, EventArgs e)
         {
             if (boxToUpdate != null)
             {
@@ -128,11 +157,12 @@ namespace CatalystNoclip
             if (p.Length == 0 && gameIsRunning)
             {
                 gameIsRunning = false;
-                Overlay.Displaying = false;
                 memory.ReleaseProcess();
 
                 GameRunningLabel.Text = "NOT RUNNING";
                 GameRunningLabel.ForeColor = Color.Red;
+
+                Overlay.Disable();
             }
             else if (p.Length != 0)
             {
@@ -142,8 +172,9 @@ namespace CatalystNoclip
                 {
                     gameIsRunning = true;
                     memory.OpenProcess("MirrorsEdgeCatalyst");
-                    Overlay.Displaying = true;
                     lastIter = true;
+
+                    Overlay.Enable(true);
                 }
 
                 bool loading = false;
@@ -158,15 +189,13 @@ namespace CatalystNoclip
 
                 if (loading && (!gameIsLoading || lastIter))
                 {
-                    ginfo.SetTimescale(1); // Lets not get stuck in a loading screen
+                    SetNoclip(false);
                     gameIsLoading = true;
                     GameRunningLabel.ForeColor = Color.Goldenrod;
                     GameRunningLabel.Text = "LOADING";
 
                     noclipOn = false;
                     noclipFT = false;
-
-                    noclipDisplayState = "NOCLIP OFF";
                 }
                 else if (!loading && (gameIsLoading || lastIter))
                 {
@@ -177,15 +206,22 @@ namespace CatalystNoclip
 
                 if (!gameIsLoading)
                 {
-                    NoclipToggleLoop();
+                    ToggleLoop();
                 }
+
+                // Handle overlay text
+                bool d = Properties.Settings.Default.OnlyShowWhenTrue;
+                speedDisplayState = (noclipOn || !d) ? "SPEED: " + speed.ToString() : "";
+                noclipDisplayState = noclipOn ? "NOCLIP ON [" + (noclipFT ? "FT" : "RT") + "]" : (d ? "" : "NOCLIP OFF");
+                noStumbleDisplayState = noStumble ? "NOSTUMBLE ON" : (d ? "" : "NOSTUMBLE OFF");
             }
         }
 
-        private void NoclipToggleLoop()
+        private void ToggleLoop()
         {
             DIKCode rtoggle = (DIKCode)Properties.Settings.Default.ToggleNC;
             DIKCode ftoggle = (DIKCode)Properties.Settings.Default.SwitchNCMode;
+            DIKCode ntoggle = (DIKCode)Properties.Settings.Default.NSHotkey;
             DIKCode speedu = (DIKCode)Properties.Settings.Default.FasterHotkey;
             DIKCode speedd = (DIKCode)Properties.Settings.Default.SlowerHotkey;
 
@@ -194,6 +230,9 @@ namespace CatalystNoclip
                 pos = pinfo.GetPosition();
                 velocity = (pos - lastpos) * 15;
                 lastpos = pos;
+
+                if (noStumble)
+                    pinfo.SetLastGroundPos(pos);
 
                 var mstate = pinfo.GetMovementState();
                 if (mstate != MovementState.Crouching)
@@ -205,60 +244,31 @@ namespace CatalystNoclip
                     Math.Abs(velocity.y + 2.45) < 0.1)
                 {
                     allowAutoNC = false;
-                    InputController.SetToggledFlag(rtoggle, true);
+                    SetNoclip(true);
                 }
             }
 
-            if (InputController.IsKeyToggled(rtoggle) && !noclipOn) 
-            {
-                noclipOn = true;
-                noclipDisplayState = "NOCLIP ON [RT]";
-            }
-            if (!InputController.IsKeyToggled(rtoggle) && noclipOn)
-            {
-                if (noclipFT)
-                {
-                    ginfo.SetTimescale(1);
-                    noclipFT = false;
-                }
-                noclipOn = false;
-                noclipDisplayState = "NOCLIP OFF";
-            }
-            if (InputController.OnKeyDown(ftoggle))
-            {
-                if (!noclipOn)
-                {
-                    noclipOn = true;
-                    InputController.SetToggledFlag(rtoggle, true);
-                }
-
-                if (noclipFT)
-                {
-                    ginfo.SetTimescale(1);
-                    noclipFT = false;
-                    noclipDisplayState = "NOCLIP ON [RT]";
-                }
-                else
-                {
-                    ginfo.SetTimescale(0);
-                    noclipFT = true;
-                    noclipDisplayState = "NOCLIP ON [FT]";
-                }
-            }
+            SetNoclip(InputController.IsKeyToggled(rtoggle));
+            SetNoclipFT(InputController.IsKeyToggled(ftoggle));
+            SetNoStumble(InputController.IsKeyToggled(ntoggle));
 
             if (InputController.OnKeyDown(speedu))
             {
-                speed += 25;
+                if (speed < 2048) speed *= 2;
                 speedDisplayState = "SPEED:" + speed.ToString();
             }
             if (InputController.OnKeyDown(speedd))
             {
-                if (speed > 25) speed -= 25;
+                if (speed > 1) speed /= 2;
                 speedDisplayState = "SPEED:" + speed.ToString();
             }
         }
 
-        public void NoclipMovementTask()
+        #endregion
+
+        #region noclip thread
+
+        public void NoclipMovementThread()
         {
             Stopwatch w = new Stopwatch();
             w.Start();
@@ -294,9 +304,14 @@ namespace CatalystNoclip
 
                     pos += dpos * speed * dt / freq;
                     pinfo.SetPosition(pos);
+                    pinfo.SetLastGroundPos(pos - Vec3.AxisY * 10);
                 }
             }
         }
+
+        #endregion
+
+        #region app events
 
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -304,8 +319,7 @@ namespace CatalystNoclip
             FTInputBox.Click += (o, s) => SetHotkey(FTInputBox, "SwitchNCMode");
             MFInputBox.Click += (o, s) => SetHotkey(MFInputBox, "FasterHotkey");
             MSInputBox.Click += (o, s) => SetHotkey(MSInputBox, "SlowerHotkey");
-            CamLeftInputBox.Click += (o, s) => SetHotkey(CamLeftInputBox, "FTCamLeft");
-            CamRightInputBox.Click += (o, s) => SetHotkey(CamRightInputBox, "FTCamRight");
+            NSInputBox.Click += (o, s) => SetHotkey(NSInputBox, "NSHotkey");
 
             Task.Run(noclipMoveLoop);
             mainNoclipLoop.Start();
@@ -365,6 +379,8 @@ namespace CatalystNoclip
             WindowState = FormWindowState.Minimized;
         }
 
+        #endregion
+
         #region enable dragging on borderless form
 
         const int WM_NCLBUTTONDOWN = 0xA1;
@@ -407,6 +423,22 @@ namespace CatalystNoclip
 
         #region settings & hotkeys
 
+        private void UpdateSettings()
+        {
+            RTInputBox.Text = ((DIKCode)Properties.Settings.Default.ToggleNC).ToString();
+            FTInputBox.Text = ((DIKCode)Properties.Settings.Default.SwitchNCMode).ToString();
+            MFInputBox.Text = ((DIKCode)Properties.Settings.Default.FasterHotkey).ToString();
+            MSInputBox.Text = ((DIKCode)Properties.Settings.Default.SlowerHotkey).ToString();
+            NSInputBox.Text = ((DIKCode)Properties.Settings.Default.NSHotkey).ToString();
+            AutoNoclipCheckbox.Checked = Properties.Settings.Default.AutoNoclip;
+
+            OverlayCheckbox.Checked = Properties.Settings.Default.ShowOverlay;
+            NCStateCheckbox.Checked = Properties.Settings.Default.ShowNCState;
+            SpeedCheckbox.Checked = Properties.Settings.Default.ShowSpeed;
+            NSStateCheckbox.Checked = Properties.Settings.Default.ShowNSState;
+            OSECheckbox.Checked = Properties.Settings.Default.OnlyShowWhenTrue;
+        }
+
         private void ResetBtn_Click(object sender, EventArgs e)
         {
             CancelSetHotkey();
@@ -416,12 +448,12 @@ namespace CatalystNoclip
             Properties.Settings.Default.FasterHotkey = 200;
             Properties.Settings.Default.SlowerHotkey = 208;
             Properties.Settings.Default.AutoNoclip = false;
-            Properties.Settings.Default.FTCamLeft = 203;
-            Properties.Settings.Default.FTCamRight = 205;
+            Properties.Settings.Default.NSHotkey = 61;
             Properties.Settings.Default.ShowOverlay = true;
             Properties.Settings.Default.ShowNCState = true;
             Properties.Settings.Default.ShowSpeed = true;
-            Properties.Settings.Default.UseMouseForFT = false;
+            Properties.Settings.Default.ShowNSState = true;
+            Properties.Settings.Default.OnlyShowWhenTrue = true;
             Properties.Settings.Default.Save();
 
             UpdateSettings();
@@ -473,17 +505,19 @@ namespace CatalystNoclip
         {
             CancelSetHotkey();
 
-            SpeedCheckbox.Checked = OverlayCheckbox.Checked;
             SpeedCheckbox.AutoCheck = OverlayCheckbox.Checked;
             SpeedCheckbox.ForeColor = OverlayCheckbox.Checked ? Color.White : Color.DimGray;
-            NCStateCheckbox.Checked = OverlayCheckbox.Checked;
             NCStateCheckbox.AutoCheck = OverlayCheckbox.Checked;
             NCStateCheckbox.ForeColor = OverlayCheckbox.Checked ? Color.White : Color.DimGray;
+            NSStateCheckbox.AutoCheck = OverlayCheckbox.Checked;
+            NSStateCheckbox.ForeColor = OverlayCheckbox.Checked ? Color.White : Color.DimGray;
+            OSECheckbox.AutoCheck = OverlayCheckbox.Checked;
+            OSECheckbox.ForeColor = OverlayCheckbox.Checked ? Color.White : Color.DimGray;
 
-            Properties.Settings.Default.ShowNCState = OverlayCheckbox.Checked;
-            Properties.Settings.Default.ShowSpeed = OverlayCheckbox.Checked;
             Properties.Settings.Default.ShowOverlay = OverlayCheckbox.Checked;
             Properties.Settings.Default.Save();
+
+            Overlay.Displaying = OverlayCheckbox.Checked;
         }
 
         private void NCStateCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -500,6 +534,38 @@ namespace CatalystNoclip
 
             Properties.Settings.Default.ShowSpeed = SpeedCheckbox.Checked;
             Properties.Settings.Default.Save();
+        }
+
+        private void NSStateCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            CancelSetHotkey();
+
+            Properties.Settings.Default.ShowNSState = NSStateCheckbox.Checked;
+        }
+
+        private void OSECheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            CancelSetHotkey();
+
+            Properties.Settings.Default.OnlyShowWhenTrue = OSECheckbox.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        #endregion
+
+        #region kys (WIP)
+
+        private void KysButton_Click(object sender, EventArgs e)
+        {
+            if (gameIsRunning && !gameIsLoading)
+            {
+                SetNoclip(false);
+
+                // This should kill the player, but since the game only does
+                // height checks when we are airborne, the player must jump.
+                float yc = pinfo.GetPosition().y + 1000;
+                pinfo.SetLastGroundYCoord(yc);
+            }
         }
 
         #endregion

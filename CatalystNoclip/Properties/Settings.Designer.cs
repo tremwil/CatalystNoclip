@@ -85,25 +85,13 @@ namespace CatalystNoclip.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("203")]
-        public int FTCamLeft {
+        [global::System.Configuration.DefaultSettingValueAttribute("61")]
+        public int NSHotkey {
             get {
-                return ((int)(this["FTCamLeft"]));
+                return ((int)(this["NSHotkey"]));
             }
             set {
-                this["FTCamLeft"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("205")]
-        public int FTCamRight {
-            get {
-                return ((int)(this["FTCamRight"]));
-            }
-            set {
-                this["FTCamRight"] = value;
+                this["NSHotkey"] = value;
             }
         }
         
@@ -145,13 +133,25 @@ namespace CatalystNoclip.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool UseMouseForFT {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowNSState {
             get {
-                return ((bool)(this["UseMouseForFT"]));
+                return ((bool)(this["ShowNSState"]));
             }
             set {
-                this["UseMouseForFT"] = value;
+                this["ShowNSState"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool OnlyShowWhenTrue {
+            get {
+                return ((bool)(this["OnlyShowWhenTrue"]));
+            }
+            set {
+                this["OnlyShowWhenTrue"] = value;
             }
         }
     }
