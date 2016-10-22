@@ -1,3 +1,6 @@
+# *NOTE: IMPROVED VERSION*
+A new version that uses DLL injection is available here: https://github.com/tremwil/CatalystNoclipInjected. It is strongly recommended to switch to this version, as it comes with better stability and performance. This version is also **no longer maintained.**
+
 # CatalystNoclip
 ![alt tag](https://raw.githubusercontent.com/tremwil/CatalystNoclip/master/app_picture.PNG)
 
